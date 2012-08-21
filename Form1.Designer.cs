@@ -58,7 +58,6 @@
             // 
             this.output.Location = new System.Drawing.Point(12, 64);
             this.output.Name = "output";
-            this.output.ReadOnly = true;
             this.output.Size = new System.Drawing.Size(340, 269);
             this.output.TabIndex = 1;
             this.output.Text = "";

@@ -14,7 +14,6 @@ namespace WindowsFormsApplication1
     {
         string[,] comments;
         int count;
-        String ytVidID;
         public Form1()
         {
             InitializeComponent();
@@ -41,7 +40,6 @@ namespace WindowsFormsApplication1
         private void goButton_Click(object sender, EventArgs e)
         {
             Boolean goOn = true;
-            Boolean validContent = true;
             Boolean debug = debugInfo.Checked;
             Boolean noDoubles = doubleComment.Checked;
             count = 0;
@@ -53,34 +51,10 @@ namespace WindowsFormsApplication1
                 numberOfWinner = 1;
             }
             output.Text = "";
-            if (youtubeID.TextLength == 11)
-            {
-                ytVidID = youtubeID.Text;
-            }
-            else if (youtubeID.Text.IndexOf("?v=") > 0)
-            {
-                ytVidID = youtubeID.Text.Substring(youtubeID.Text.IndexOf("?v=") + 3, 11);
-            }
-            else
-            {
-                goOn = false;
-                validContent = false;
-            }
-
             while (goOn)
             {
                 HtmlAgilityPack.HtmlWeb web = new HtmlWeb();
-                HtmlAgilityPack.HtmlDocument doc = web.Load("http://www.youtube.com/all_comments?v=" + ytVidID + ";page=" + page);
-                if (doc.DocumentNode.SelectSingleNode("//span[@class='comments-section-stat']") == null)
-                {
-                    if (debug) output.Text += "Invalid page!" + " " + "http://www.youtube.com/all_comments?v=" + ytVidID + ";page=" + page;
-                    goOn = false;
-                    if (page == 1)
-                    {
-                        validContent = false;
-                    }
-                    break;
-                }
+                HtmlAgilityPack.HtmlDocument doc = web.Load("http://www.youtube.com/all_comments?v="+youtubeID.Text+";page=" + page);
                 if (totalComments == 0)
                 {
                     string totalCommentsString = doc.DocumentNode.SelectSingleNode("//span[@class='comments-section-stat']").InnerHtml.Replace(".", "");
@@ -101,15 +75,15 @@ namespace WindowsFormsApplication1
                     {
                         // Comment has been marked as spam. Use other way of getting the comment.
                         HtmlNode comment = link.SelectSingleNode(link.XPath + "//div/div/div/div/p");
-                        HtmlNode author = link.SelectSingleNode(link.XPath + "//a[@class='yt-user-name ']");
+                        HtmlNode author = link.SelectSingleNode(link.XPath + "//a[@class='yt-uix-sessionlink yt-user-name ']");
                         if (author != null && comment != null)
                         {
                             if (!noDoubles || checkIfUnique(author.InnerHtml))
                             {
                                 if (debug)
                                 {
-                                    output.Text += "The comment: " + comment.InnerHtml + "\n";
-                                    output.Text += "Author: " + author.InnerHtml + "\n\n";
+                                    output.Text = output.Text + "The comment: " + comment.InnerHtml + "\n";
+                                    output.Text = output.Text + "Author: " + author.InnerHtml + "\n\n";
                                 }
                                 comments[count, 0] = comment.InnerHtml;
                                 comments[count, 1] = author.InnerHtml;
@@ -120,15 +94,15 @@ namespace WindowsFormsApplication1
                     else
                     {
                         HtmlNode comment = link.SelectSingleNode(link.XPath + "//p");
-                        HtmlNode author = link.SelectSingleNode(link.XPath + "//a[@class='yt-user-name ']");
+                        HtmlNode author = link.SelectSingleNode(link.XPath + "//a[@class='yt-uix-sessionlink yt-user-name ']");
                         if (author != null && comment != null)
                         {
                             if (!noDoubles || checkIfUnique(author.InnerHtml))
                             {
                                 if (debug)
                                 {
-                                    output.Text += "The comment: " + comment.InnerHtml + "\n";
-                                    output.Text += "Author: " + author.InnerHtml + "\n\n";
+                                    output.Text = output.Text + "The comment: " + comment.InnerHtml + "\n";
+                                    output.Text = output.Text + "Author: " + author.InnerHtml + "\n\n";
                                 }
                                 comments[count, 0] = comment.InnerHtml;
                                 comments[count, 1] = author.InnerHtml;
@@ -139,29 +113,21 @@ namespace WindowsFormsApplication1
                 }
                 page++;
             }
-
-            if (validContent)
+            output.Text = output.Text + "There is a total of " + count + " comments\n\n";
+            int winnerCount = 0;
+            Random random = new Random();
+            while (numberOfWinner > winnerCount)
             {
-                output.Text += "There is a total of " + count + " comments\n\n";
-                int winnerCount = 0;
-                Random random = new Random();
-                while (numberOfWinner > winnerCount)
-                {
-                    winnerCount++;
-                    int winner = random.Next(count - 1);
-                    output.Text += "The winning comment number is: " + winner + "\n\n";
-                    output.Text += "The winner is: " + comments[winner, 1] + "\n" + "With the comment: " + comments[winner, 0] + "\n\n\n\n";
-                }
-            }
-            else
-            {
-                MessageBox.Show("Noget gik galt. Tjek dit link og prøv igen.", "Fejl", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                winnerCount++;
+                int winner = random.Next(count - 1);
+                output.Text = output.Text + "The winning comment number is: " + winner + "\n\n";
+                output.Text = output.Text + "The winner is: " + comments[winner, 1] + "\n" + "With the comment: " + comments[winner, 0] + "\n\n\n\n";
             }
         }
 
         private void youtubeID_TextChanged(object sender, EventArgs e)
         {
-            if (youtubeID.TextLength == 11 || youtubeID.Text.IndexOf("?v=") > 0)
+            if (youtubeID.TextLength == 11)
                 goButton.Enabled = true;
             else
                 goButton.Enabled = false;
