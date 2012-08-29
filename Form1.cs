@@ -13,6 +13,7 @@ namespace WindowsFormsApplication1
     public partial class Form1 : Form
     {
         string[,] comments;
+        string youtubeIDString;
         int count;
         public Form1()
         {
@@ -51,10 +52,11 @@ namespace WindowsFormsApplication1
                 numberOfWinner = 1;
             }
             output.Text = "";
+
             while (goOn)
             {
                 HtmlAgilityPack.HtmlWeb web = new HtmlWeb();
-                HtmlAgilityPack.HtmlDocument doc = web.Load("http://www.youtube.com/all_comments?v="+youtubeID.Text+";page=" + page);
+                HtmlAgilityPack.HtmlDocument doc = web.Load("http://www.youtube.com/all_comments?v="+youtubeIDString+";page=" + page);
                 if (totalComments == 0)
                 {
                     string totalCommentsString = doc.DocumentNode.SelectSingleNode("//span[@class='comments-section-stat']").InnerHtml.Replace(".", "");
@@ -128,9 +130,24 @@ namespace WindowsFormsApplication1
         private void youtubeID_TextChanged(object sender, EventArgs e)
         {
             if (youtubeID.TextLength == 11)
+            {
                 goButton.Enabled = true;
+                youtubeIDString = youtubeID.Text;
+            }
             else
-                goButton.Enabled = false;
+            {
+                if (youtubeID.Text.Contains("watch?v="))
+                {
+                    int index = youtubeID.Text.IndexOf("watch?v=") + 8;
+                    youtubeIDString = youtubeID.Text.Substring(index, 11);
+                    goButton.Enabled = true;
+                }
+                else
+                {
+                    goButton.Enabled = false;
+                    youtubeIDString = "";
+                }
+            }
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
