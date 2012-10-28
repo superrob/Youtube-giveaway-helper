@@ -59,12 +59,14 @@ namespace WindowsFormsApplication1
                 HtmlAgilityPack.HtmlDocument doc = web.Load("http://www.youtube.com/all_comments?v="+youtubeIDString+";page=" + page);
                 if (totalComments == 0)
                 {
-                    string totalCommentsString = doc.DocumentNode.SelectSingleNode("//span[@class='comments-section-stat']").InnerHtml.Replace(".", "");
-                    totalComments = int.Parse(totalCommentsString.Substring(1, totalCommentsString.Length - 2));
+                    string totalCommentsString = doc.DocumentNode.SelectSingleNode("//div[@id='comments-view']/div/h4").InnerHtml.Replace(".", "");
+                    int startLoc = totalCommentsString.IndexOf("(")+1;
+                    int endLoc = totalCommentsString.IndexOf(")");
+                    totalComments = int.Parse(totalCommentsString.Substring(startLoc, endLoc-startLoc));
                     if (debug) output.Text = "Total number of comments expected: " + totalComments + "\n\n\n";
                     comments = new string[totalComments, 2];
                 }
-                if (doc.DocumentNode.SelectSingleNode("//span[@class='comments-section-stat']") == null)
+                if (doc.DocumentNode.SelectSingleNode("//div[@id='comments-view']/div/h4") == null)
                 {
                     if (debug) output.Text = output.Text + "Invalid page " + page + " stopping.";
                     goOn = false;
